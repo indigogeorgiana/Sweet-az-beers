@@ -1,48 +1,74 @@
 import React from 'react'
 import {connect} from 'react-redux'
 
-import {navigate} from '../actions'
+import CartItem from './CartItem'
 
-import beerData from '../../data/beers'
+import {
+  navigate,
+  deleteFromCart,
+  updateCart} from '../actions'
 
-const Cart = (props) => {
-  return (
-    <div className='cart'>
-      <table>
-        <thead>
-          <tr>
-            <td>Beer</td>
-            <td>Quantity</td>
-            <td>Remove</td>
-          </tr>
-        </thead>
-        <tbody>
-          {props.cart.map((item, id) => {
-            const name = getNameFromId(item.id)
-            return (
-              <tr key={id}>
-                <td>{name}</td>
-                <td><input className='update-input' value={item.quantity} /></td>
-                <td><button><span className='fa fa-trash fa-2x' /></button></td>
-                {/* TODO: implement deletes */}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+/*
+ * This is a stateful component to manage the state of the quantities
+ * before the update button is selected. The Redux state isn't
+ * updated until the Update button is selected but this component's
+ * state is updated each time a quantity changes.
+ */
+class Cart extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      cart: props.cart
+    }
+  }
 
-      <p className='actions'>
-        <a href='#' onClick={props.keepShopping}>Continue shopping</a>
-        <button>Update</button> {/* TODO: implement updates */}
-        <button className='button-primary'>Checkout</button>
-      </p>
-    </div>
-  )
-}
+  update (id, quantity) {
+    this.setState({
+      cart: this.state.cart.map(item => {
+        if (item.id === id) item.quantity = Number(quantity)
+        return item
+      })
+    })
+  }
 
-function getNameFromId (id) {
-  const beer = beerData.beers.find(beer => beer.id === id)
-  return beer.name
+  deleteItem (id) {
+    const cart = this.state.cart.filter(item => item.id !== id)
+    this.setState({cart})
+    this.props.deleteFromCart(id)
+  }
+
+  render () {
+    return (
+      <div className='cart'>
+        <table>
+          <thead>
+            <tr>
+              <td>Beer</td>
+              <td>Quantity</td>
+              <td>Remove</td>
+            </tr>
+          </thead>
+          <tbody>
+            {this.props.cart.map((item, id) => {
+              return (
+                <CartItem key={id}
+                  item={item}
+                  update={this.update.bind(this)}
+                  deleteFromCart={this.deleteItem.bind(this)}
+                />
+              )
+            })}
+          </tbody>
+        </table>
+
+        <p className='actions'>
+          <a href='#' onClick={this.props.keepShopping}>Continue shopping</a>
+          <button onClick={() => this.props.updateCart(this.state.cart)}>Update</button>
+          <button className='button-primary'>Checkout</button>
+        </p>
+      </div>
+    )
+  }
 }
 
 const mapStateToProps = (state) => {
@@ -53,7 +79,9 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    keepShopping: () => dispatch(navigate('listing'))
+    keepShopping: () => dispatch(navigate('listing')),
+    deleteFromCart: (id) => dispatch(deleteFromCart(id)),
+    updateCart: (cart) => dispatch(updateCart(cart))
   }
 }
 
