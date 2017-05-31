@@ -1,8 +1,12 @@
 import { combineReducers } from 'redux'
 
-// import otherReducer from './other-reducer'
+import currentPage from './current-page'
+import beers from './beers'
+import cart from './cart'
 
 export default combineReducers({
-  // otherReducer
+  currentPage,
+  beers,
+  cart
 })
 

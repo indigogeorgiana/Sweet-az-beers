@@ -1,4 +1,7 @@
 import React from 'react'
+import {connect} from 'react-redux'
+
+import {navigate} from '../actions'
 
 import beerData from '../../data/beers'
 
@@ -42,4 +45,19 @@ function getNameFromId (id) {
   return beer.name
 }
 
-export default Cart
+const mapStateToProps = (state) => {
+  return {
+    cart: state.cart
+  }
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    keepShopping: () => dispatch(navigate('listing'))
+  }
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Cart)
